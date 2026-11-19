@@ -130,7 +130,7 @@
 <script>
   // ====== 歌单（换成你想放的歌） ======
   const TRACKS = [
-    { title: 'First Rain in Spring', artist: 'BigRicePiano', src: './music/song1.mp3' },
+    { title: 'First Rain in Spring', artist: 'BigRicePiano', src: './song1.mp3', alt: './music/song1.mp3' },
   ];
   // ===================================
   const audio=document.getElementById('audio'), playBtn=document.getElementById('playBtn'),
@@ -139,7 +139,7 @@
         tsub=document.getElementById('tsub');
   let idx=0;
   const fmt=s=>{if(!isFinite(s))return'0:00';const m=Math.floor(s/60),x=Math.floor(s%60);return m+':'+String(x).padStart(2,'0')};
-  function load(i,auto){idx=i;const t=TRACKS[i];if(!t)return;audio.src=t.src;
+  function load(i,auto,tryAlt){idx=i;const t=TRACKS[i];if(!t)return;audio.src=tryAlt?t.alt:(t.src);audio.dataset.fallback=tryAlt?'1':'';
     tname.textContent=t.title;tsub.textContent=t.artist||'';if(auto)play()}
   function play(){audio.play().then(()=>{playBtn.textContent='❚❚'})
     .catch(()=>{tsub.textContent='浏览器拦了自动播放，再点一下'})}
@@ -149,6 +149,7 @@
     seek.value=Math.round(audio.currentTime/audio.duration*1000);curEl.textContent=fmt(audio.currentTime)});
   audio.addEventListener('loadedmetadata',()=>{durEl.textContent=fmt(audio.duration)});
   audio.addEventListener('ended',()=>{load((idx+1)%TRACKS.length,true)});
+  audio.addEventListener('error',()=>{const t=TRACKS[idx];if(t&&t.alt&&!audio.dataset.fallback){load(idx,false,true)}});
   seek.addEventListener('input',()=>{if(audio.duration)audio.currentTime=seek.value/1000*audio.duration});
   load(0,false);
 </script>
